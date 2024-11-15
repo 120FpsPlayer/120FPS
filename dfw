@@ -1,0 +1,69 @@
+function bloodCauldron(p: player) :: boolean:
+    if {_p}'s inventory doesn't contain beetroot soup:
+        return false
+    set {_tools::*} to bow, golden apple, and "3 ender pearl" parsed as item
+    add trident, fire charge named "&c&oFireball" to {_tools::*}
+    add enchanted golden apple, 3 steak, totem of undying to {_tools::*}
+    add splash potion of harming to {_tools::*}
+    set {_a} to trident
+    enchant {_a} with loyalty 1
+    set {_b} to crossbow
+    enchant {_b} with piercing 1
+    set {_d} to player head named "&fSmoke Grenade" with lore "&7Right click to throw a Smoke grenade" and "&7That &cblinds &7your opponents!"
+    set {_c} to stone axe
+    add nbt from "{SkullOwner:{Id:[I;880357396,1879261975,-2030399572,572816016],Properties:{textures:[{Value:""eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvN2U1NWM1YWJjZTdhNzkyNjRhNDg5MmQ2ODgwNmVhYWZlMzcwYTBlNGRkMjZmNTYxOTFmN2MxODhmMDFlZDcyNiJ9fX0=""}]}}}" to nbt of {_d}
+    add {_a}, {_b}, potion of strength, potion of swiftness to {_tools::*}
+    add {_c}, {_d} to {_tools::*}
+    set {_randomtool} to random element out of {_tools::*}
+    remove 1 beetroot soup from {_p}'s inventory
+    give {_p} 1 bowl
+    give {_p} {_randomtool}
+    if {_randomtool} is bow:
+        give {_p} 64 arrows
+    if {_randomtool} is {_b}:
+        give {_p} 64 arrows
+    if {_randomtool} is {_c}:
+        execute console command "/gear axe 1 %{_p}%"
+    return true
+
+on right click on cauldron:
+    if player is holding beetroot soup:
+        execute console command "/exp give %player% 1"
+        if player isn't sneaking:
+            bloodCauldron(player)
+        else:
+            while bloodCauldron(player):
+                play sound "entity.skeleton.death" with volume 99 and pitch 1 for player
+                wait 3 ticks
+                play sound "block.brewing_stand.brew" with volume 99 and pitch 1 for player
+    else:
+        send "&cYou need to hold someone's blood! It's a bowl with <tooltip:blood>red liquid<reset>&c in it named ""(player)'s blood"" " to player
+
+on right click:
+    if target block of player is a cauldron:
+        stop
+    if player is holding a fire charge:
+        remove fire charge from player's inventory
+        shoot a fireball from the player at speed 3
+
+on left click on cauldron:
+    open virtual chest inventory with size 3 named "Blood Cauldron Items" to player
+    format slot 0 of player with bow named "&6Bow" with lore "&7Buy for 150 souls"
+    format slot 1 of player with trident named "&6Trident" with lore "&7Buy for 150 souls"
+    format slot 2 of player with enchanted golden apple named "&6Enchanted Golden Apple" with lore "&7Buy for 150 souls"
+    format slot 3 of player with totem of undying named "&6Totem of Undying" with lore "&7Buy for 150 souls"
+    format slot 4 of player with potion of strength named "&6Potion of Strength" with lore "&7Buy for 150 souls"
+    format slot 5 of player with potion of swiftness named "&6Potion of Swiftness" with lore "&7Buy for 150 souls"
+    format slot 6 of player with player head named "&fSmoke Grenade" with lore "&7Buy for 150 souls"
+    format slot 7 of player with fire charge named "&c&oFireball" with lore "&7Buy for 150 souls"
+    format slot 8 of player with splash potion of harming named "&6Splash Potion of Harming" with lore "&7Buy for 150 souls"
+
+on inventory click:
+    if inventory name of player's current inventory is "Blood Cauldron Items":
+        cancel event
+        if clicked item's lore contains "&7Buy for 150 souls":
+            if {player's_balance::%player%} >= 150:
+                remove 150 from {player's_balance::%player%}
+                give player clicked item
+            else:
+                send "&cYou do not have enough souls!"
